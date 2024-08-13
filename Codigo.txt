@@ -24,6 +24,8 @@
 /* USER CODE BEGIN Includes */
 #include "st7735.h"
 #include "stdio.h"
+#include "stdlib.h"
+#include "time.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,8 +53,8 @@ SPI_HandleTypeDef hspi1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
-void ST7735_Init(void);
 /* USER CODE BEGIN PFP */
+void ST7735_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -72,10 +74,10 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
+
+
 	HAL_Init();
-
   /* USER CODE BEGIN Init */
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -90,142 +92,13 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   ST7735_Init();
-  ST7735_FillScreen(GREEN);
-  int bombs = 10;
-  int totalbombs = bombs;
-  char matriz [6][4];
-
-  for(int i = 1;i <= 121;i+=20){
-	  ST7735_DrawLine(i,80,i,0,WHITE);
-	  ST7735_DrawLine(0,i,120,i,WHITE);
-  }
-  for(int i = 1;i <= 121;i+=20){
-	  ST7735_DrawLine(i,80,i,0,WHITE);
-	  ST7735_DrawLine(0,i,120,i,WHITE);
-  }
-  ST7735_DrawLine(0,79,120,79,WHITE);
-  ST7735_WriteString(123,5,"BOMBS", Font_7x10, WHITE, GREEN);
-
-  int x = 3;
-  int y = 17;
-  int lastx = x;
-  int lasty = y;
-  char game = 1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (game == 1){
-		  char WriteBombs[2];
-		  sprintf(WriteBombs, "%i", bombs);
-		  ST7735_WriteString(133,15,WriteBombs, Font_7x10, WHITE, GREEN);
-
-		  if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_9)){
-			  x += 20;
-			  HAL_Delay(300);
-		  }
-
-		  if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_11)){
-			  x -= 20;
-			  HAL_Delay(150);
-		  }
-
-		  if (x >= 120){
-			y += 20;
-			x = 3;
-			if (y >= 80){
-				y = 17;
-			}
-		  }
-
-		  if (x <= 0){
-			y -= 20;
-			x = 103;
-			if (y <= 0){
-				y = 77;
-			}
-		  }
-
-		  if (lastx != x){
-			  ST7735_DrawLine(lastx,lasty,lastx+16,lasty,GREEN);
-			  HAL_Delay(150);
-			  lastx = x;
-			  lasty = y;
-		  }
-
-		  ST7735_DrawLine(x,y,x+16,y,WHITE);
-
-		  if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_10)){
-			 if (matriz[(y)/20][(x)/20] == 1){
-				 ST7735_DrawLine(x+2,y-7,x+12,y-7,BLACK);
-				 ST7735_DrawLine(x+7,y-2,x+7,y-12,BLACK);
-				 ST7735_DrawLine(x+3,y-11,x+10,y-3,BLACK);
-				 ST7735_DrawLine(x+3,y-3,x+10,y-11,BLACK);
-				 ST7735_FillRectangleFast(x+5,y-11,5,9,BLACK);
-				 ST7735_FillRectangleFast(x+3,y-9,9,5,BLACK);
-
-				 game = 0;
-				 HAL_Delay(2000);
-
-			 }else if (matriz[(y)/20][(x)/20] == 0){
-				 ST7735_WriteString(x+4,y-11,"O", Font_7x10, WHITE, GREEN);
-			 }
-		  }
-
-		  if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_12)){
-			 if (bombs > 0){
-				 if ((matriz[(y)/20][(x)/20] == 2) || (matriz[(y)/20][(x)/20] == 3)){
-					 ST7735_FillRectangleFast(x-1,y-15,19,19,GREEN);
-					 bombs++;
-					 matriz[(y)/20][(x)/20] = (matriz[(y)/20][(x)/20] == 2)? 0 : 1;
-					 HAL_Delay(150);
-				 }else{
-					 ST7735_FillRectangleFast(x+3, y-4, 10, 2, BLACK);
-					 ST7735_DrawLine(x+5,y-5,x+9,y-5,BLACK);
-					 ST7735_DrawLine(x+8,y-5,x+8,y-8,BLACK);
-					 ST7735_FillRectangleFast(x+7,y-13,2,5,RED);
-					 ST7735_FillRectangleFast(x+5,y-12,2,3,RED);
-					 ST7735_DrawLine(x+4,y-11,x+4,y-11,RED);
-
-					 bombs--;
-					 matriz[(y)/20][(x)/20] = (matriz[(y)/20][(x)/20] == 1)? 2 : 3;
-					 HAL_Delay(150);
-				 }
-			 }
-		  }
-		  if (bombs == 0){
-			  for(int h = 0;h < 6;h++){
-				  for(int v = 0;v < 4;v++){
-					  if(matriz[(y)/20][(x)/20] == 1){
-						  totalbombs--;
-					  }
-				  }
-			  }
-		  }
-
-	  }else{
-		  ST7735_FillScreen(GREEN);
-
-		  for(int i = 1;i <= 121;i+=20){
-			  ST7735_DrawLine(i,80,i,0,WHITE);
-			  ST7735_DrawLine(0,i,120,i,WHITE);
-		  }
-		  for(int i = 1;i <= 121;i+=20){
-			  ST7735_DrawLine(i,80,i,0,WHITE);
-			  ST7735_DrawLine(0,i,120,i,WHITE);
-		  }
-		  ST7735_DrawLine(0,79,120,79,WHITE);
-		  ST7735_WriteString(123,5,"BOMBS", Font_7x10, WHITE, GREEN);
-
-		  bombs = 10;
-		  x = 3;
-		  y = 17;
-		  lastx = x;
-		  lasty = y;
-		  game = 1;
-	  }
+	  Menu(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -348,7 +221,201 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void Menu(char menu){
+	ST7735_FillScreen(BLACK);
+	ST7735_WriteString(30,5,"Campo Minado", Font_7x10, WHITE, BLACK);
+	ST7735_WriteString(50,35,"Jogar", Font_7x10, WHITE, BLACK);
+	ST7735_WriteString(50,55,"Bombas", Font_7x10, WHITE, BLACK);
 
+	char escolha = 0;
+	int bombas = 8;
+
+	while(menu){
+		if (escolha == 0){
+			ST7735_DrawLine(50,47,85,47,WHITE);
+			if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_11)){
+				escolha = 1;
+				ST7735_DrawLine(50,47,85,47,BLACK);
+			}
+
+			if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_10)){
+				Jogo(bombas,1);
+			}
+			HAL_Delay(150);
+		}else{
+			ST7735_DrawLine(50,67,92,67,WHITE);
+			if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_9)){
+				escolha = 0;
+				ST7735_DrawLine(50,67,92,67,BLACK);
+			}
+
+			if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_10)){
+				bombas = QuantBombs(1);
+			}
+			HAL_Delay(150);
+		}
+	}
+}
+
+int QuantBombs(char QB){
+	
+}
+
+void Jogo(int TB,char game){
+	SetCampo();
+
+	int bombs = 0;
+	int totalbombs = 1;
+
+	char matriz [6][4];
+	for(int h = 0;h < 6;h++){
+	  for(int v = 0;v < 4;v++){
+	    if(bombs < totalbombs){
+	      matriz[h][v] = rand()%2;
+	    }else{
+	      matriz[h][v] = 0;
+	    }
+	    if (matriz[h][v] == 1) bombs++;
+	  }
+	}
+
+	int x = 3;
+	int y = 17;
+	int lastx = x;
+	int lasty = y;
+	char verif = 1;
+
+	while (game)
+	{
+		//Desenhar quantidade de bandeiras
+		char WriteBombs[2];
+		sprintf(WriteBombs, "%i", bombs);
+		ST7735_WriteString(133,15,WriteBombs, Font_7x10, WHITE, GREEN);
+
+		//Verificar se as bandeiras estão em todas as bombas
+		if (bombs == 0){
+		  if (verif == 1){
+			for(int h = 0;h < 6;h++){
+			  for(int v = 0;v < 4;v++){
+				if(matriz[h][v] == 2){
+				  totalbombs--;
+				}
+			 }
+		  }
+		  verif = 0;
+		  }
+		}
+
+		//Andar pelo Campo
+		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_9)){
+		  x += 20;
+		  HAL_Delay(300);
+		}
+
+		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_11)){
+		  x -= 20;
+		  HAL_Delay(150);
+		}
+
+		IndicarLoc(x,y);
+
+		if (lastx != x){
+		  ST7735_DrawLine(lastx,lasty,lastx+16,lasty,GREEN);
+		  HAL_Delay(150);
+		  lastx = x;
+		  lasty = y;
+		}
+
+		ST7735_DrawLine(x,y,x+16,y,WHITE);
+
+		if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_10)){
+		  if (matriz[(x)/20][(y)/20] == 1){
+		  DesenharBomba(x,y);
+
+		  game = 0;
+		  HAL_Delay(2000);
+
+		  }else if (matriz[(x)/20][(y)/20] == 0){
+			ST7735_WriteString(x+4,y-11,"O", Font_7x10, WHITE, GREEN);
+		  }
+		}
+
+		if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_12)){
+		  if (bombs >= 0){
+			if ((matriz[(x)/20][(y)/20] == 2) || (matriz[(x)/20][(y)/20] == 3)){
+			  ST7735_FillRectangleFast(x-1,y-15,19,19,GREEN);
+
+			  bombs++;
+			  matriz[(x)/20][(y)/20] = (matriz[(x)/20][(y)/20] == 2)? 1 : 0;
+			  HAL_Delay(250);
+			  }else{
+			  DesenharBandeira(x,y);
+
+			  bombs--;
+			  matriz[(x)/20][(y)/20] = (matriz[(x)/20][(y)/20] == 1)? 2 : 3;
+			  HAL_Delay(250);
+			  }
+		   }
+		}
+
+		if (totalbombs == 0){
+		  game = 0;
+		  HAL_Delay(2000);
+		  }
+		}
+	Menu(1);
+}
+
+void SetCampo(void){
+	  ST7735_FillScreen(GREEN);
+	  for(int i = 1;i <= 121;i+=20){
+		  ST7735_DrawLine(i,80,i,0,WHITE);
+		  ST7735_DrawLine(0,i,120,i,WHITE);
+	  }
+	  for(int o = 1;o <= 121;o+=20){
+		  ST7735_DrawLine(o,80,o,0,WHITE);
+		  ST7735_DrawLine(0,o,120,o,WHITE);
+	  }
+	  ST7735_DrawLine(0,79,120,79,WHITE);
+	  ST7735_WriteString(123,5,"BOMBS", Font_7x10, WHITE, GREEN);
+}
+void IndicarLoc(int x,int y){
+  if (x >= 120){
+	y += 20;
+	x = 3;
+	if (y >= 80){
+		y = 17;
+	}
+  }
+
+  if (x <= 0){
+	y -= 20;
+	x = 103;
+	if (y <= 0){
+		y = 77;
+	}
+  }
+
+  ST7735_DrawLine(x,y,x+16,y,WHITE);
+}
+
+void DesenharBomba(int h,int v){
+	 ST7735_DrawLine(h+2,v-7,h+12,v-7,BLACK);
+	 ST7735_DrawLine(h+7,v-2,h+7,v-12,BLACK);
+	 ST7735_DrawLine(h+3,v-11,h+10,v-3,BLACK);
+	 ST7735_DrawLine(h+3,v-3,h+10,v-11,BLACK);
+	 ST7735_FillRectangleFast(h+5,v-11,5,9,BLACK);
+	 ST7735_FillRectangleFast(h+3,v-9,9,5,BLACK);
+}
+
+void DesenharBandeira(int h,int v){
+	 ST7735_FillRectangleFast(h+3, v-4, 10, 2, BLACK);
+	 ST7735_DrawLine(h+5,v-5,h+9,v-5,BLACK);
+	 ST7735_DrawLine(h+8,v-5,h+8,v-8,BLACK);
+	 ST7735_FillRectangleFast(h+7,v-13,2,5,RED);
+	 ST7735_FillRectangleFast(h+5,v-12,2,3,RED);
+	 ST7735_DrawLine(h+4,v-11,h+4,v-11,RED);
+}
 /* USER CODE END 4 */
 
 /**
